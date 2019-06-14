@@ -1,0 +1,58 @@
+---
+name: 000 - Auto Build and Apply
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: us-east-1
+
+jobs:
+  packer_build:
+    defaults:
+      run:
+        working-directory: ./terraform
+    name: Packer Terraform AWS
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Packer
+    - name: Use latest Packer
+      uses: hashicorp-contrib/setup-packer@v1
+
+    - name: Export ENV
+      run: |
+        touch .env
+        echo ${{ secrets.ENV_FILE }} | base64 -d > .env
+
+    - name: Tape Archive
+      run: touch ./mqtt.ter.tgz
+      #run: tar --exclude-vcs  --exclude='./docs' --exclude=.env -zcvf  ./mqtt.ter.tgz  ./env.template ../mqtt-tester.service ../app_1 ../app_2 ../app_3 ../mqtt ../docker-compose.yaml
+        
+    - name: Build image from template
+      run: packer build vm.pkr.hcl
+
+    # Terra
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Format Fix
+      run: terraform fmt .
+
+    - name: Terraform Format
+      run: terraform fmt -check
+
+    - name: Terraform Plan
+      run: terraform plan -no-color
+     
+    - name: Terraform Apply
+      run: terraform apply -auto-approve    

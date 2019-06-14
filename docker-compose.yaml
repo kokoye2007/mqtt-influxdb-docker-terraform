@@ -1,0 +1,109 @@
+version: "3"
+
+services:
+  mosquitto:
+    container_name: mosquitto
+    build:
+      context: mqtt
+      dockerfile: Dockerfile
+      args:
+        - MOSQUITTO_VERSION=${MOSQUITTO_VERSION:-latest}
+    restart: always
+    volumes:
+      - ./mqtt:/mosquitto/:rw
+    environment:
+      - MQTT_USER=${MQTT_USER}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+    ports:
+      - 1883:1883
+      - 9001:9001
+
+  mqtt-explorer:
+    container_name: explorer
+    image: smeagolworms4/mqtt-explorer
+    ports:
+      - 4000:4000
+    depends_on:
+      - mosquitto
+    environment:
+      - HTTP_USER=${EX_USER}
+      - HTTP_PASSWORD=${EX_PASS}
+
+  influxdb:
+    container_name: influxdb
+    image: influxdb:latest
+    ports:
+      - 8086:8086
+    volumes:
+      - ./influxdb-storage:/var/lib/influxdb
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_USERNAME}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET}
+      - DOCKER_INFLUXDB_INIT_RETENTION=${INFLUXDB_RETENTION}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN}
+
+  # chronograf:
+  #   image: chronograf:latest
+  #   ports:
+  #     - 8888:8888
+  #   volumes:
+  #     - ./chronograf-storage:/var/lib/chronograf
+  #   depends_on:
+  #     - influxdb
+  #   environment:
+
+  app_1:
+    container_name: mqtt-app1
+    build:
+      context: app_1
+      dockerfile: Dockerfile
+    volumes:
+      - ./app_1:/usr/src/app/:rw
+    environment:
+      - MQTT_BROKER=${MQTT_BROKER}
+      - MQTT_PORT=${MQTT_PORT}
+      - MQTT_USER=${MQTT_USER}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+    depends_on:
+      - mosquitto
+
+  app_2:
+    container_name: mqtt-app2
+    build:
+      context: app_2
+      dockerfile: Dockerfile
+    volumes:
+      - ./app_2:/usr/src/app/:rw
+    environment:
+      - MQTT_BROKER=${MQTT_BROKER}
+      - MQTT_PORT=${MQTT_PORT}
+      - MQTT_USER=${MQTT_USER}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+      - INFLUXDB_URL=${INFLUXDB_URL}
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
+    depends_on:
+      - mosquitto
+      - influxdb
+      - app_1
+
+  app_3:
+    container_name: mqtt-app3
+    build:
+      context: app_3
+      dockerfile: Dockerfile
+    volumes:
+      - ./app_3:/usr/src/app/:rw
+    environment:
+      - MQTT_BROKER=${MQTT_BROKER}
+      - MQTT_PORT=${MQTT_PORT}
+      - MQTT_USER=${MQTT_USER}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+    depends_on:
+      - app_1
+      - app_2
+      - mosquitto

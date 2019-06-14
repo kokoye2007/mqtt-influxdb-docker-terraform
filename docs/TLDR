@@ -1,0 +1,35 @@
+#
+# TLS SSL
+# https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-the-mosquitto-mqtt-messaging-broker-on-ubuntu-16-04
+#
+# Docker MQTT
+# https://hometechhacker.com/mqtt-using-docker-and-home-assistant/
+#
+# Docker MQTT
+# https://medium.com/@abdallahjarwan/mqtt-application-using-docker-6e61d7a3642d
+#
+# Database
+# https://github.com/pradeesi/Store_MQTT_Data_in_Database
+#
+# Data Logger
+# http://www.steves-internet-guide.com/simple-python-mqtt-data-logger/
+#
+# Python MQTT Tutorial: Store IoT Metrics with InfluxDB
+# https://thenewstack.io/python-mqtt-tutorial-store-iot-metrics-with-influxdb/
+#
+# Influxdb Python
+# https://github.com/influxdata/influxdb-client-python
+#
+# Awesome InfluxDB
+# https://project-awesome.org/mark-rushakoff/awesome-influxdb
+#
+# InfluxDB Community Templates
+# https://github.com/influxdata/community-templates#templates
+#
+#
+# install asciinema 
+#
+# ascinema play switchdin.cast
+# ascinema play https://asciinema.org/a/EswytSj2BRIsEmcVYuQRZESZn
+#
+

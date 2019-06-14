@@ -1,0 +1,17 @@
+# /etc/systemd/system/mqtt-tester.service
+
+[Unit]
+Description=MQTT Test Application Docker Compose
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/srv/
+ExecStart=docker-compose --env-file .env up -d
+ExecStop=docker-compose down
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target
